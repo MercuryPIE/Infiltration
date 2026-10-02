@@ -1,64 +1,63 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AT2.EndingState;
+﻿using AT2.EndingState;
 using AT2.Utility;
 
 namespace AT2.ObstacleControl.BaseObstacles
 {
-    public class Sensor
+    public class Sensor : IObstacleExtension<double>
     {
-        private readonly Boundary ReceivedBoundary;
-        private readonly ClassId CID;
-        private readonly Vector Location;
-        private readonly double Range;
-
-        private Sensor(Instruction ReceivedInstruction, Boundary ReceivedBoundary)
+        
+        public Vector Location { get; set; }
+        public double ExtensionData { get; set; }
+        private readonly ClassId _obstacleClass = ClassId.Sensor;
+        
+        public Sensor(Vector Location, double Range)
         {
-            this.ReceivedBoundary = ReceivedBoundary;
-
-            CID = ReceivedInstruction.GetCID();
-            Location = ReceivedInstruction.GetLocation();
-            ReceivedInstruction.GetLink().GetExtensionData(out Range);
-
-            CalculateSensor();
+            this.Location = Location;
+            ExtensionData = Range;
         }
-
-        private void CalculateSensor()
+        
+        public void CalculateObstacle()
         {
-            double X = Convert.ToDouble(Location.GetX());
-            double Y = Convert.ToDouble(Location.GetY());
+            var range = ExtensionData;
+            
+            //TODO: Look at converting the vector to Double and doing calculations with it.
+            var x = Convert.ToDouble(Location.X);
+            var y = Convert.ToDouble(Location.Y);
+            
+            var xRange = x + range;
+            var yRange = y + range;
+            
+            var xPos = Convert.ToInt32(Math.Floor(x - range));
+            var yPos = Convert.ToInt32(Math.Floor(y - range));
 
-            double XRange = X + Range;
-            double YRange = Y + Range;
-
-            int StartX = Convert.ToInt32(Math.Floor(X - Range));
-            int StartY = Convert.ToInt32(Math.Floor(Y - Range));
-
-            for (int XPos = StartX; XPos <= XRange; XPos++)
+            for (; xPos <= xRange; xPos++)
             {
-                for (int YPos = StartY; YPos <= YRange; YPos++)
+                for (; yPos <= yRange; yPos++)
                 {
-                    double XPower = Math.Pow(XPos - X, 2);
-                    double YPower = Math.Pow(YPos - Y, 2);
+                    var xPower = Math.Pow(xPos - x, 2);
+                    var yPower = Math.Pow(yPos - y, 2);
 
-                    double Distance = Math.Sqrt(XPower + YPower);
+                    var distance = Math.Sqrt(xPower + yPower);
 
-                    Vector NewLocation = Vector.CreateVector(XPos, YPos);
+                    var newLocation = new Vector(xPos, yPos);
 
-                    if (Distance <= Range && Boundary.IsInBoundary(NewLocation, ReceivedBoundary, out Vector CheckedLocation))
+                    if (distance <= range && Boundary.IsInBoundary(newLocation, out Vector checkedLocation))
                     {
-                        FinalState.AddObstacle(Obstacle.Create(CheckedLocation, CID));
+                        FinalState.AddObstacle(Obstacle.Create(checkedLocation, _obstacleClass));
                     }
                 }
             }
         }
-
-        public static Sensor CreateSensor(Instruction BaseInstruction, Boundary BaseBoundary)
+        
+        public double GetExtensionData()
         {
-            return new Sensor(BaseInstruction, BaseBoundary);
+            return ExtensionData;
+        }
+        
+
+        public void RemoveExtensionData()
+        {
+            ExtensionData = 0;
         }
     }
 }

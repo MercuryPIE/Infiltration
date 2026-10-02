@@ -1,34 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AT2.EndingState;
-using AT2.ObstacleControl;
+﻿using AT2.EndingState;
 using AT2.Utility;
 
 namespace AT2.ObstacleControl.BaseObstacles
 {
-    public class Guard
+    public class Guard : IObstacleBase
     {
-        private readonly Vector Location;
-        private readonly ClassId CID;
+        public Vector Location { get; set; }
 
-        private Guard(Instruction ReceivedInstruction)
-        {
-            Location = ReceivedInstruction.GetLocation();
-            CID = ReceivedInstruction.GetCID();
+        private readonly ClassId _obstacleClass = ClassId.Guard;
 
-            CalculateGuard();
-        }
+        public Guard(Vector Location)
+        {
+            this.Location = Location;
 
-        private void CalculateGuard()
-        {
-            FinalState.AddObstacle(Obstacle.Create(Location, CID));
         }
-        public static Guard CreateGuard(Instruction BaseInstruction)
+        
+        public void CalculateObstacle()
         {
-            return new Guard(BaseInstruction);
+            FinalState.AddObstacle(Obstacle.Create(Location, _obstacleClass));
         }
+        
+
     }
 }

@@ -3,47 +3,51 @@ using AT2.Utility;
 
 namespace AT2.ObstacleControl.BaseObstacles
 {
-    public class Fence
+    public class Fence : IObstacleExtension<Vector>
     {
-        private readonly ClassId CID;
-        private readonly Vector Start, End;
+        public Vector Location { get; set; }
+        public Vector ExtensionData { get; set; }
+        private readonly ClassId _obstacleClass = ClassId.Fence;
 
-        private Fence(Instruction ReceivedInstruction)
+        public Fence(Vector StartLocation, Vector EndLocation)
         {
-            Start = ReceivedInstruction.GetLocation();
-            CID = ReceivedInstruction.GetCID();
+            Location = StartLocation;
+            ExtensionData = EndLocation;
 
-            ReceivedInstruction.GetLink().GetExtensionData(out End);
-
-            CalculateFence();
         }
-        private void CalculateFence()
+        
+        public void CalculateObstacle()
         {
-            FinalState.AddObstacle(Obstacle.Create(Start, CID));
-            FinalState.AddObstacle(Obstacle.Create(End, CID));
+            Vector start = Location;
+            Vector end = ExtensionData;
+            
+            FinalState.AddObstacle(Obstacle.Create(start, _obstacleClass));
+            FinalState.AddObstacle(Obstacle.Create(end, _obstacleClass));
 
-            int StepX = Math.Sign(End.GetX() - Start.GetX());
-            int StepY = Math.Sign(End.GetY() - Start.GetY());
+            var isHorizontal = start.X == end.X;
 
-            bool IsHorizontal = Vector.CompareVectors(Start, End, Vector.ComOperator.EQ, Vector.ComDimension.X);
+            var stepControl = isHorizontal ? Math.Sign(end.Y - start.Y) : Math.Sign(end.X - start.X);
+            
+            var loopStart = isHorizontal ? start.Y : start.X;
+            var loopEnd = isHorizontal ? end.Y : end.X;
 
-            int StepControl = IsHorizontal ? StepY : StepX;
-
-            int LoopStart = IsHorizontal ? Start.GetY() : Start.GetX();
-            int LoopEnd = IsHorizontal ? End.GetY() : End.GetX();
-
-            for (int i = LoopStart; i != LoopEnd; i += StepControl)
+            for (var i = loopStart; i != loopEnd; i += stepControl)
             {
-                int X = IsHorizontal ? Start.GetX() : i;
-                int Y = IsHorizontal ? i : Start.GetY();
-
-                FinalState.AddObstacle(Obstacle.Create(Vector.CreateVector(X, Y), CID));
+                var x = isHorizontal ? start.X : i;
+                var y = isHorizontal ? i : start.Y;
+                
+                FinalState.AddObstacle(Obstacle.Create(new Vector(x, y), _obstacleClass));
             }
         }
-
-        public static Fence CreateFence(Instruction BaseInstruction)
+        
+        public void RemoveExtensionData()
         {
-            return new Fence(BaseInstruction);
+            ExtensionData = new Vector(0, 0, Vector.VectorState.Empty);
+        }
+
+        public Vector GetExtensionData()
+        {
+            return ExtensionData;
         }
     }
 }

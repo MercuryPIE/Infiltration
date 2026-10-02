@@ -26,10 +26,7 @@ namespace AT2
 
         private static readonly List<Instruction> Instructions = new List<Instruction>();
 
-        public static List<Instruction> AccessInstructionList
-        {
-            get { return Instructions; }
-        }
+        public static List<Instruction> AccessInstructionList => Instructions;
 
         public static void DisplayInstructionList()
         {

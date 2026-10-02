@@ -241,7 +241,7 @@ namespace AT2.EndingState
                 OpenSet.Remove(CurrentNode);
                 ClosedSet.Add(CurrentNode.GetNodeKey());
 
-                if (Vector.CompareVectors(CurrentNode.CurrentLocation, CurrentNode.PathInfo.GetFinish(), Vector.ComOperator.EQ))
+                if (Vector.CompareVectors(CurrentNode.CurrentLocation, CurrentNode.PathInfo.GetFinish(), Vector.ComOperator.Eq))
                 {
                     string PathTaken = BuildPath(CurrentNode);
 
@@ -263,7 +263,7 @@ namespace AT2.EndingState
             {
                 return false;
             }
-            else if (!Boundary.IsInBoundary(BaseNode.CurrentLocation, Boundary.Calculate(Start, Goal), out _))
+            else if (!Boundary.IsInBoundary(BaseNode.CurrentLocation, out _))
             {
                 return false;
             }
@@ -310,19 +310,19 @@ namespace AT2.EndingState
                     Vector CNodeLocation = NodesInPath.CurrentLocation;
                     Vector PNodeLocation = NodesInPath.NodeInfo.GetParent()!.CurrentLocation;
 
-                    if (Vector.CompareVectors(CNodeLocation, PNodeLocation, Vector.ComOperator.LT, Vector.ComDimension.X))
+                    if (Vector.CompareVectors(CNodeLocation, PNodeLocation, Vector.ComOperator.Lt, Vector.ComDimension.X))
                     {
                         PathTaken.Append('W');
                     }
-                    else if (Vector.CompareVectors(CNodeLocation, PNodeLocation, Vector.ComOperator.GT, Vector.ComDimension.X))
+                    else if (Vector.CompareVectors(CNodeLocation, PNodeLocation, Vector.ComOperator.Gt, Vector.ComDimension.X))
                     {
                         PathTaken.Append('E');
                     }
-                    else if (Vector.CompareVectors(CNodeLocation, PNodeLocation, Vector.ComOperator.LT, Vector.ComDimension.Y))
+                    else if (Vector.CompareVectors(CNodeLocation, PNodeLocation, Vector.ComOperator.Lt, Vector.ComDimension.Y))
                     {
                         PathTaken.Append('N');
                     }
-                    else if (Vector.CompareVectors(CNodeLocation, PNodeLocation, Vector.ComOperator.GT, Vector.ComDimension.Y))
+                    else if (Vector.CompareVectors(CNodeLocation, PNodeLocation, Vector.ComOperator.Gt, Vector.ComDimension.Y))
                     {
                         PathTaken.Append('S');
                     }

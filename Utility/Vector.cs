@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static AT2.Utility.Error;
+﻿using static AT2.Utility.Error;
 
 namespace AT2.Utility
 {
@@ -11,15 +6,15 @@ namespace AT2.Utility
     {
         public struct Range
         {
-            private readonly int MinValue, MaxValue;
+            private readonly int _minValue, _maxValue;
             private Range(int MinValue, int MaxValue)
             {
-                this.MinValue = MinValue;
-                this.MaxValue = MaxValue;
+                this._minValue = MinValue;
+                this._maxValue = MaxValue;
             }
 
-            public readonly int GetMin() { return MinValue; }
-            public readonly int GetMax() { return MaxValue; }
+            public readonly int GetMin() { return _minValue; }
+            public readonly int GetMax() { return _maxValue; }
 
             public static Range CreateRange(int Min, int Max)
             {
@@ -32,7 +27,7 @@ namespace AT2.Utility
 
             public override string ToString()
             {
-                return $"({MinValue}, {MaxValue})";
+                return $"({_minValue}, {_maxValue})";
             }
         }
 
@@ -43,9 +38,11 @@ namespace AT2.Utility
             Valid, Empty
         }
 
-        private int X, Y;
-        private readonly VectorState State;
-        public Vector(int X, int Y, VectorState State)
+        public int X;
+        public int Y;
+        public VectorState State;
+        
+        public Vector(int X, int Y, VectorState State = VectorState.Valid)
         {
             this.X = X;
             this.Y = Y;
@@ -54,12 +51,18 @@ namespace AT2.Utility
 
         // -------------------------------------------------
 
-        public override bool Equals(object? obj)
+        public override bool Equals(object? Obj)
         {
-            if (obj == null || GetType() != obj.GetType()) return false;
-            Vector other = (Vector)obj;
-            return CompareVectors(this, other, ComOperator.EQ);
+            if (Obj == null || GetType() != Obj.GetType())
+            {
+                return false;
+            }
+            
+            Vector other = (Vector)Obj;
+            
+            return CompareVectors(this, other, ComOperator.Eq);
         }
+        
         public override int GetHashCode()
         {
             return HashCode.Combine(X, Y);
@@ -71,83 +74,48 @@ namespace AT2.Utility
         {
             X, Y, Both
         }
+        
         public enum ComOperator
         {
-            EQ, // Equals,
-            GTEQ, // Greater Than Or Equal To,
-            LTEQ, // Less Than Or Equal To,
-            LT, // Less Than,
-            GT // Greater Than,
+            Eq, // Equals,
+            Gteq, // Greater Than Or Equal To,
+            Lteq, // Less Than Or Equal To,
+            Lt, // Less Than,
+            Gt // Greater Than,
         }
-        public static bool CompareVectors(Vector Vector_1, Vector Vector_2, ComOperator Operator, ComDimension Type = ComDimension.Both)
+        
+        public static bool CompareVectors(Vector Vector1, Vector Vector2, ComOperator Operator, ComDimension Type = ComDimension.Both)
         {
-            switch (Type)
+            return Type switch
             {
-                case ComDimension.X:
-                    return CompareValues(Vector_1.GetX(), Vector_2.GetX(), Operator);
-
-                case ComDimension.Y:
-                    return CompareValues(Vector_1.GetY(), Vector_2.GetY(), Operator);
-
-                case ComDimension.Both:
-                    return CompareValues(Vector_1.GetX(), Vector_2.GetX(), Operator) && CompareValues(Vector_1.GetY(), Vector_2.GetY(), Operator);
-
-                default:
-                    return false;
-            }
+                ComDimension.X => CompareValues(Vector1.X, Vector2.X, Operator),
+                ComDimension.Y => CompareValues(Vector1.Y, Vector2.Y, Operator),
+                ComDimension.Both => CompareValues(Vector1.X, Vector2.X, Operator) &&
+                                     CompareValues(Vector1.Y, Vector2.Y, Operator),
+                _ => false
+            };
         }
-        private static bool CompareValues(int Value_1, int Value_2, ComOperator Operator)
+        
+        private static bool CompareValues(int Value1, int Value2, ComOperator Operator)
         {
-            switch (Operator)
+            return Operator switch
             {
-                case ComOperator.EQ:
-                    return Value_1 == Value_2;
-
-                case ComOperator.GT:
-                    return Value_1 > Value_2;
-
-                case ComOperator.LT:
-                    return Value_1 < Value_2;
-
-                case ComOperator.LTEQ:
-                    return Value_1 <= Value_2;
-
-                case ComOperator.GTEQ:
-                    return Value_1 >= Value_2;
-
-                default:
-                    return false;
-            }
+                ComOperator.Eq => Value1 == Value2,
+                ComOperator.Gt => Value1 > Value2,
+                ComOperator.Lt => Value1 < Value2,
+                ComOperator.Lteq => Value1 <= Value2,
+                ComOperator.Gteq => Value1 >= Value2,
+                _ => false
+            };
         }
-
+        
         // -------------------------------------------------
-
-        public int GetX()
+        
+        public void UpdateVector(int NewX, int NewY, VectorState NewState = VectorState.Valid)
         {
-            return X;
-        }
-        public int GetY()
-        {
-            return Y;
-        }
-        public VectorState GetState()
-        {
-            return State;
-        }
-
-        // -------------------------------------------------
-
-        public static Vector CreateVector(int X, int Y)
-        {
-            return new Vector(X, Y, VectorState.Valid);
-        }
-        public static Vector CreateEmptyVector()
-        {
-            return new Vector(0, 0, VectorState.Empty);
-        }
-        public static Vector UpdateVector(int NewX, int NewY)
-        {
-            return CreateVector(NewX, NewY);
+            X = NewX;
+            Y = NewY;
+            State = NewState;
         }
 
         public static bool IsLocationValid(string? Location, out Vector CheckedVector)
@@ -157,22 +125,22 @@ namespace AT2.Utility
                 CheckedVector = Validate.Location(Location);
                 return true;
             }
-            catch (InvalidInputException ExM)
+            catch (InvalidInputException exM)
             {
-                Console.WriteLine($"Error: {ExM.Message}");
-                CheckedVector = CreateEmptyVector();
+                Console.WriteLine($"Error: {exM.Message}");
+                CheckedVector = new Vector(0, 0, VectorState.Empty);
                 return false;
             }
-            catch (InvalidFormatException ExM)
+            catch (InvalidFormatException exM)
             {
-                Console.WriteLine($"Error: {ExM.Message}");
-                CheckedVector = CreateEmptyVector();
+                Console.WriteLine($"Error: {exM.Message}");
+                CheckedVector = new Vector(0, 0, VectorState.Empty);
                 return false;
             }
-            catch (EmptyConsoleException ExM)
+            catch (EmptyConsoleException exM)
             {
-                Console.WriteLine($"Error: {ExM.Message}");
-                CheckedVector = CreateEmptyVector();
+                Console.WriteLine($"Error: {exM.Message}");
+                CheckedVector = new Vector(0, 0, VectorState.Empty);
                 return false;
             }
         }
@@ -181,7 +149,7 @@ namespace AT2.Utility
 
         public override string ToString()
         {
-            return $"({GetX()}, {GetY()})";
+            return $"({X}, {Y})";
         }
     }
 }

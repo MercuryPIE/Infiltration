@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Tommy\\OneDrive\\Documents\\Coding Projects\\C# Projets\\CAB201 Project v2\\AT2\\AT2.csproj": {}
+    "C:\\Users\\Tommy\\Documents\\JetBrains IDE's\\Rider\\Infiltration\\AT2.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Tommy\\OneDrive\\Documents\\Coding Projects\\C# Projets\\CAB201 Project v2\\AT2\\AT2.csproj": {
+    "C:\\Users\\Tommy\\Documents\\JetBrains IDE's\\Rider\\Infiltration\\AT2.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Tommy\\OneDrive\\Documents\\Coding Projects\\C# Projets\\CAB201 Project v2\\AT2\\AT2.csproj",
+        "projectUniqueName": "C:\\Users\\Tommy\\Documents\\JetBrains IDE's\\Rider\\Infiltration\\AT2.csproj",
         "projectName": "AT2",
-        "projectPath": "C:\\Users\\Tommy\\OneDrive\\Documents\\Coding Projects\\C# Projets\\CAB201 Project v2\\AT2\\AT2.csproj",
+        "projectPath": "C:\\Users\\Tommy\\Documents\\JetBrains IDE's\\Rider\\Infiltration\\AT2.csproj",
         "packagesPath": "C:\\Users\\Tommy\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Tommy\\OneDrive\\Documents\\Coding Projects\\C# Projets\\CAB201 Project v2\\AT2\\obj\\",
+        "outputPath": "C:\\Users\\Tommy\\Documents\\JetBrains IDE's\\Rider\\Infiltration\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

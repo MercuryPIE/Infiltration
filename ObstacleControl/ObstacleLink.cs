@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AT2.Utility;
+﻿using AT2.Utility;
 
 namespace AT2.ObstacleControl
 {
@@ -32,9 +27,9 @@ namespace AT2.ObstacleControl
 
             public static FenceEnd CreateData(object? Data)
             {
-                if (Data is Vector ConvertedData)
+                if (Data is Vector convertedData)
                 {
-                    return new FenceEnd(ConvertedData);
+                    return new FenceEnd(convertedData);
                 }
                 throw new ArgumentException("Invalid data type for FenceEnd: Must be Vector.");
             }
@@ -117,15 +112,9 @@ namespace AT2.ObstacleControl
 
         public void GetExtensionData<T>(out T Data)
         {
-            if (typeof(T) == typeof(Vector) && LinkedData is FenceEnd)
-            {
-                Data = (T)LinkedData.GetData();
-            }
-            else if (typeof(T) == typeof(double) && LinkedData is SensorRange)
-            {
-                Data = (T)LinkedData.GetData();
-            }
-            else if (typeof(T) == typeof(char) && LinkedData is CameraDirection)
+            if (typeof(T) == typeof(Vector) && LinkedData is FenceEnd || 
+                typeof(T) == typeof(double) && LinkedData is SensorRange || 
+                typeof(T) == typeof(char) && LinkedData is CameraDirection)
             {
                 Data = (T)LinkedData.GetData();
             }

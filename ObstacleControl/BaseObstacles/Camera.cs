@@ -142,7 +142,7 @@ namespace AT2.ObstacleControl.BaseObstacles
                     Vector NewLocation = Vector.CreateVector(X, Y);
 
                     // Check if the new calculated location is within the boundary or not.
-                    if (Boundary.IsInBoundary(NewLocation, ReceivedBoundary, out Vector CalculatedLocation))
+                    if (Boundary.IsInBoundary(NewLocation, out Vector CalculatedLocation))
                     {
                         // Add location to the FinalState.
                         FinalState.AddObstacle(Obstacle.Create(CalculatedLocation, CID));

@@ -1,5 +1,4 @@
-﻿using System;
-using AT2.EndingState;
+﻿using AT2.EndingState;
 
 namespace AT2
 {
