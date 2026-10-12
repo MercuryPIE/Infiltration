@@ -1,10 +1,12 @@
 ﻿using AT2.EndingState;
+using AT2.InstructionControl;
+using AT2.ObstacleControl.BaseObstacles;
 
 namespace AT2
 {
     internal class Program
     {
-        enum Options
+        private enum Options
         {
             AddGuard = 'g',
             AddFence = 'f',
@@ -22,14 +24,14 @@ namespace AT2
             while (true)
             {
                 WriteOptions();
-                Options SelectedOption = GetConsoleOptions();
+                var selectedOption = GetConsoleOptions();
 
-                if (SelectedOption == Options.Exit)
+                if (selectedOption == Options.Exit)
                 {
                     break;
                 }
 
-                RunOption(SelectedOption);
+                RunOption(selectedOption);
             }
         }
 
@@ -49,11 +51,12 @@ namespace AT2
 
         private static Options GetConsoleOptions()
         {
-            string? Input = Console.ReadLine();
+            var consoleInput = Console.ReadLine();
+            
             // Try to parse the input as char and check if the char is defined in the enum of options.
-            bool OptionCheck = char.TryParse(Input, out char OptionSelected) && Enum.IsDefined(typeof(Options), (int)OptionSelected);
-
-            return OptionCheck ? (Options)(int)OptionSelected : Options.Invalid;
+            var optionCheck = char.TryParse(consoleInput, out var optionSelected) && Enum.IsDefined(typeof(Options), (int)optionSelected);
+            
+            return optionCheck ? (Options)optionSelected : Options.Invalid;
         }
 
         private static void RunOption(Options OptionPicked)

@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AT2.InstructionControl;
 using AT2.Utility;
 
 namespace AT2.ObstacleControl
 {
     public class Obstacle
     {
+        
+        
         private Vector Location;
         private ClassId CID;
         private int PriorityValue;
@@ -37,7 +34,6 @@ namespace AT2.ObstacleControl
 
         public static readonly Dictionary<ClassId, int> MapCIDToPV = new Dictionary<ClassId, int>
         {
-            {ClassId.Invalid, 0},
             {ClassId.Camera, 1},
             {ClassId.Sensor, 2},
             {ClassId.Guard, 3},
@@ -46,7 +42,6 @@ namespace AT2.ObstacleControl
 
         public static readonly Dictionary<int, ClassId> MapPVToCID = new Dictionary<int, ClassId>
         {
-            {0, ClassId.Invalid},
             {1, ClassId.Camera},
             {2, ClassId.Sensor},
             {3, ClassId.Guard},
@@ -62,7 +57,7 @@ namespace AT2.ObstacleControl
 
         public static ClassId SetCid(int Pv)
         {
-            return MapPVToCID.GetValueOrDefault(Pv, ClassId.Invalid);
+            return MapPVToCID.GetValueOrDefault(Pv, ClassId.Guard);
         }
 
         // -------------------------------------------------

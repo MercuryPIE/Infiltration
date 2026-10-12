@@ -1,113 +1,72 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
+﻿using System.Collections;
 using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 using AT2.ObstacleControl;
 using AT2.Utility;
-using static AT2.EndingState.Node;
 
 namespace AT2.EndingState
 {
-    public class PriorityQueueWithNodeID
+    public class PriorityQueueWithNodeId
     {
-        private readonly List<Tuple<Node, int, int>> Elements = new List<Tuple<Node, int, int>>();
-        public int Count => Elements.Count;
+        private readonly List<Tuple<Node, int, int>> _elements = new();
+        public int Count => _elements.Count;
 
         public void Enqueue(Node Item)
         {
-            int Priority = Item.GetCostData().GetCostData(CostData.Access.FCost);
-            int NodeID = Item.GetNodeData().GetNodeID();
+            var priority = Item.GetCostData().FCost;
+            var nodeId = Item.GetNodeData().NodeId;
 
-            Elements.Add(new Tuple<Node, int, int>(Item, NodeID, Priority));
+            _elements.Add(new Tuple<Node, int, int>(Item, nodeId, priority));
             Sort();
         }
         private void Sort()
         {
-            Elements.Sort((X, Y) =>
+            _elements.Sort((X, Y) =>
             {
-                int PriorityCompare = X.Item3.CompareTo(Y.Item3);
+                var priorityCompare = X.Item3.CompareTo(Y.Item3);
 
-                if (PriorityCompare == 0)
-                {
-                    return X.Item2.CompareTo(Y.Item2);
-                }
-                return PriorityCompare;
-            });
-        }
+                return priorityCompare == 0 ? X.Item2.CompareTo(Y.Item2) : priorityCompare;
+                     });
+                 }
+        
         public Node Dequeue()
         {
             if (Count == 0)
             {
                 throw new InvalidOperationException("ERROR");
             }
-
-            Node Result = Elements[0].Item1;
-            Elements.RemoveAt(0);
-            return Result;
+         
+            var result = _elements[0].Item1;
+            _elements.RemoveAt(0);
+            return result;
         }
+
     }
     public class Node
     {
         public readonly struct CostData
         {
-            public enum Access
-            {
-                FCost, GCost, HCost
-            }
-
-            private readonly int GCost, HCost, FCost;
-            private CostData(int GCost, int HCost)
+            public readonly int GCost, HCost, FCost;
+            public CostData(int GCost, int HCost)
             {
                 this.GCost = GCost;
                 this.HCost = HCost;
                 FCost = GCost + HCost;
             }
-
-            public readonly int GetCostData(Access AccessID)
-            {
-                switch (AccessID)
-                {
-                    case Access.FCost:
-                        return FCost;
-                    case Access.GCost:
-                        return GCost;
-                    case Access.HCost:
-                        return HCost;
-                    default:
-                        return -1;
-                }
-            }
-            public static CostData CreateCostData(int GCost, int HCost)
-            {
-                return new CostData(GCost, HCost);
-            }
-
+            
             public override string ToString()
             {
-                return $"G_Cost: {GCost}, H_Cost: {HCost}, F_Cost: {FCost}";
+                return $"G Cost: {GCost}, H Cost: {HCost}, F Cost: {FCost}";
             }
         }
         public readonly struct PathData
         {
-            private readonly Vector Start, Finish;
-            private PathData(Vector Start, Vector Finish)
+            public readonly Vector Start, Finish;
+            public PathData(Vector Start, Vector Finish)
             {
                 this.Start = Start;
                 this.Finish = Finish;
             }
-
-            public readonly Vector GetStart() { return Start; }
-            public readonly Vector GetFinish() { return Finish; }
-
-            public static PathData CreatePathData(Vector Start, Vector Finish)
-            {
-                return new PathData(Start, Finish);
-            }
-
+            
             public override string ToString()
             {
                 return $"Start of the Path: {Start}, End of the Path: {Finish}";
@@ -115,118 +74,109 @@ namespace AT2.EndingState
         }
         public readonly struct NodeData
         {
-            private static int NextNodeID = 0;
-            private readonly Node? Parent;
-            private readonly int NodeID;
+            private static int _nextNodeId;
+            public readonly Node? Parent;
+            public readonly int NodeId;
 
-            private NodeData(Node? Parent)
+            public NodeData(Node? Parent)
             {
                 this.Parent = Parent;
-                NodeID = NextNodeID++;
+                NodeId = _nextNodeId++;
             }
-
-            public readonly Node? GetParent() { return Parent; }
-            public readonly int GetNodeID() { return NodeID; }
-
-            public static NodeData CreateNodeData(Node? Parent)
-            {
-                return new NodeData(Parent);
-            }
-
+            
             public override string ToString()
             {
                 return $"Parent Link:\n\n{Parent}";
             }
         }
-
+        
         public readonly struct Neighbours : IEnumerable<Node>
         {
-            private readonly Node North_Node, South_Node, East_Node, West_Node;
+            private readonly Node _northNode, _southNode, _eastNode, _westNode;
 
             private Neighbours(Vector CurrentLocation, Node Parent)
             {
-                Vector NorthLocation = Vector.CreateVector(CurrentLocation.GetX(), CurrentLocation.GetY() - 1);
-                Vector SouthLocation = Vector.CreateVector(CurrentLocation.GetX(), CurrentLocation.GetY() + 1);
-                Vector EastLocation = Vector.CreateVector(CurrentLocation.GetX() + 1, CurrentLocation.GetY());
-                Vector WestLocation = Vector.CreateVector(CurrentLocation.GetX() - 1, CurrentLocation.GetY());
+                var northLocation = new Vector(CurrentLocation.X, CurrentLocation.Y- 1);
+                var southLocation = new Vector(CurrentLocation.X, CurrentLocation.Y + 1);
+                var eastLocation = new Vector(CurrentLocation.X + 1, CurrentLocation.Y);
+                var westLocation = new Vector(CurrentLocation.X - 1, CurrentLocation.Y);
 
-                North_Node = CreateLinkNode(NorthLocation, Parent);
-                South_Node = CreateLinkNode(SouthLocation, Parent);
-                East_Node = CreateLinkNode(EastLocation, Parent);
-                West_Node = CreateLinkNode(WestLocation, Parent);
+                _northNode = new Node(northLocation, Parent);
+                _southNode = new Node(southLocation, Parent);
+                _eastNode = new Node(eastLocation, Parent);
+                _westNode = new Node(westLocation, Parent);
             }
 
             public static Neighbours GenerateNeighbours(Vector Location, Node Parent)
             {
                 return new Neighbours(Location, Parent);
             }
-            public readonly IEnumerator<Node> GetEnumerator()
+            
+            public IEnumerator<Node> GetEnumerator()
             {
-                yield return North_Node;
-                yield return South_Node;
-                yield return East_Node;
-                yield return West_Node;
+                yield return _northNode;
+                yield return _southNode;
+                yield return _eastNode;
+                yield return _westNode;
             }
-            readonly IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+
+            IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
         }
 
-        private readonly Vector CurrentLocation;
+        private readonly Vector _currentLocation;
 
-        private readonly NodeData NodeInfo;
-        private readonly PathData PathInfo;
-        private readonly CostData CostInfo;
+        private readonly NodeData _nodeInfo;
+        private readonly PathData _pathInfo;
+        private readonly CostData _costInfo;
 
         private Node(Vector Start, Vector Finish)
         {
-            CurrentLocation = Start;
-            NodeInfo = NodeData.CreateNodeData(null);
-            PathInfo = PathData.CreatePathData(Start, Finish);
-            CostInfo = CostData.CreateCostData(0, HCostCalculate());
+            // Starting Node.
+            _currentLocation = Start;
+            _nodeInfo = new NodeData(null);
+            _pathInfo = new PathData(Start, Finish);
+            _costInfo = new CostData(0, HCostCalculate());
         }
         private Node(Vector Location, Node Parent)
         {
-            CurrentLocation = Location;
-            NodeInfo = NodeData.CreateNodeData(Parent);
-            PathInfo = PathData.CreatePathData(Parent.PathInfo.GetStart(), Parent.PathInfo.GetFinish());
-            CostInfo = CostData.CreateCostData(GCostCalculate(), HCostCalculate());
+            // Linking Node.
+            _currentLocation = Location;
+            _nodeInfo = new NodeData(Parent);
+            _pathInfo = new PathData(Parent._pathInfo.Start, Parent._pathInfo.Finish);
+            _costInfo = new CostData(GCostCalculate(), HCostCalculate());
         }
 
-        private readonly static HashSet<Node> OpenSet = new HashSet<Node>();
-        private readonly static HashSet<Vector> ClosedSet = new HashSet<Vector>();
+        private readonly static HashSet<Node> OpenSet = new();
+        private readonly static HashSet<Vector> ClosedSet = new();
 
-        private readonly static PriorityQueueWithNodeID Open = new PriorityQueueWithNodeID();
+        private readonly static PriorityQueueWithNodeId Open = new();
+        
+        
 
-        private readonly static Stack<Node> Path = new Stack<Node>();
+        public NodeData GetNodeData() { return _nodeInfo; }
+        public CostData GetCostData() { return _costInfo; }
 
-        public Vector GetNodeKey() { return CurrentLocation; }
-
-        public NodeData GetNodeData() { return NodeInfo; }
-        public CostData GetCostData() { return CostInfo; }
-        public PathData GetPathData() { return PathInfo; }
 
         public static void FindSafePath()
         {
             while (true)
             {
                 Console.WriteLine("Enter your current location (X,Y):");
-                string? Input = Console.ReadLine();
+                var input = Console.ReadLine();
 
-                if (Vector.IsLocationValid(Input, out Vector StartLocation))
+                if (!Vector.IsLocationValid(input, out var startLocation)) continue;
+                
+                while (true)
                 {
-                    while (true)
-                    {
-                        Console.WriteLine("Enter the location of the mission objective (X,Y):");
-                        Input = Console.ReadLine();
+                    Console.WriteLine("Enter the location of the mission objective (X,Y):");
+                    input = Console.ReadLine();
 
-                        if (Vector.IsLocationValid(Input, out Vector FinishLocation))
-                        {
-                            Instruction.CalculateInstructions(Boundary.Calculate(StartLocation, FinishLocation));
-                            FindPath(CreateStartNode(StartLocation, FinishLocation));
-                            break;
-                        }
-                    }
+                    if (!Vector.IsLocationValid(input, out var finishLocation)) continue;
+                    
+                    FindPath(new Node(startLocation, finishLocation));
                     break;
                 }
+                break;
             }
         }
         private static void FindPath(Node StartNode)
@@ -236,117 +186,94 @@ namespace AT2.EndingState
 
             while (Open.Count > 0)
             {
-                Node CurrentNode = Open.Dequeue();
+                var currentNode = Open.Dequeue();
 
-                OpenSet.Remove(CurrentNode);
-                ClosedSet.Add(CurrentNode.GetNodeKey());
+                OpenSet.Remove(currentNode);
+                ClosedSet.Add(currentNode._currentLocation);
 
-                if (Vector.CompareVectors(CurrentNode.CurrentLocation, CurrentNode.PathInfo.GetFinish(), Vector.ComOperator.Eq))
+                if (Vector.CompareVectors(currentNode._currentLocation, currentNode._pathInfo.Finish, Vector.ComOperator.Eq))
                 {
-                    string PathTaken = BuildPath(CurrentNode);
+                    var pathTaken = BuildPath(currentNode);
 
                     Console.WriteLine("End Found");
-                    Console.WriteLine($"Path Taken:\n{PathTaken}");
+                    Console.WriteLine($"Path Taken:\n{pathTaken}");
                     break;
                 }
 
-                CheckNeighbours(CurrentNode, CurrentNode);
+                CheckNeighbours(currentNode, currentNode);
             }
         }
 
         private static bool IsTraversable(Node BaseNode)
         {
-            Vector Start = BaseNode.PathInfo.GetStart();
-            Vector Goal = BaseNode.PathInfo.GetFinish();
-
-            if (FinalState.AccessFinalObstacles.ContainsKey(BaseNode.GetNodeKey()))
+            var currentLocation = BaseNode._currentLocation;
+            
+            return BaseNode switch
             {
-                return false;
-            }
-            else if (!Boundary.IsInBoundary(BaseNode.CurrentLocation, out _))
-            {
-                return false;
-            }
-            else if (ClosedSet.Contains(BaseNode.GetNodeKey()))
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+                _ when FinalState.AccessFinalObstacles.ContainsKey(currentLocation) => false,
+                _ when !Boundary.IsInBoundary(currentLocation, out _) => false,
+                _ when ClosedSet.Contains(currentLocation) => false,
+                _ => true,
+            };
         }
         private static void CheckNeighbours(Node CurrentNode, Node Parent)
         {
-            Neighbours NeighbourNodes = Neighbours.GenerateNeighbours(CurrentNode.CurrentLocation, Parent);
+            var neighbourNodes = Neighbours.GenerateNeighbours(CurrentNode._currentLocation, Parent);
 
-            foreach (Node BaseNode in NeighbourNodes)
+            foreach (var baseNode in neighbourNodes)
             {
-                if (IsTraversable(BaseNode))
-                {
-                    if (CurrentNode.CostInfo.GetCostData(CostData.Access.FCost) > BaseNode.CostInfo.GetCostData(CostData.Access.GCost) || !OpenSet.Contains(BaseNode))
-                    {
-                        Open.Enqueue(BaseNode);
-                        OpenSet.Add(BaseNode);
-                    }
-                }
+                if (!IsTraversable(baseNode)) continue;
+                
+                if (CurrentNode._costInfo.FCost <= baseNode._costInfo.GCost && OpenSet.Contains(baseNode)) continue;
+                
+                Open.Enqueue(baseNode);
+                OpenSet.Add(baseNode);
             }
         }
         private static string BuildPath(Node FinalNode)
         {
-            StringBuilder PathTaken = new StringBuilder();
-            Node CurrentNode = FinalNode;
+            var pathTaken = new StringBuilder();
+            var currentNode = FinalNode;
+            var path = new Stack<Node>();
 
-            while (CurrentNode!.NodeInfo.GetParent() != null)
+            while (currentNode._nodeInfo.Parent != null)
             {
-                Path.Push(CurrentNode);
-                CurrentNode = CurrentNode.NodeInfo.GetParent()!;
+                path.Push(currentNode);
+                currentNode = currentNode._nodeInfo.Parent!;
             }
 
-            foreach (Node NodesInPath in Path)
+            foreach (var nodesInPath in path)
             {
-                if (NodesInPath.NodeInfo.GetParent() != null)
+                if (nodesInPath._nodeInfo.Parent == null) continue;
+                
+                var cNodeLocation = nodesInPath._currentLocation;
+                var pNodeLocation = nodesInPath._nodeInfo.Parent._currentLocation;
+                
+                var nodeDirection = true switch
                 {
-                    Vector CNodeLocation = NodesInPath.CurrentLocation;
-                    Vector PNodeLocation = NodesInPath.NodeInfo.GetParent()!.CurrentLocation;
-
-                    if (Vector.CompareVectors(CNodeLocation, PNodeLocation, Vector.ComOperator.Lt, Vector.ComDimension.X))
-                    {
-                        PathTaken.Append('W');
-                    }
-                    else if (Vector.CompareVectors(CNodeLocation, PNodeLocation, Vector.ComOperator.Gt, Vector.ComDimension.X))
-                    {
-                        PathTaken.Append('E');
-                    }
-                    else if (Vector.CompareVectors(CNodeLocation, PNodeLocation, Vector.ComOperator.Lt, Vector.ComDimension.Y))
-                    {
-                        PathTaken.Append('N');
-                    }
-                    else if (Vector.CompareVectors(CNodeLocation, PNodeLocation, Vector.ComOperator.Gt, Vector.ComDimension.Y))
-                    {
-                        PathTaken.Append('S');
-                    }
-                }
+                    _ when Vector.CompareVectors(cNodeLocation, pNodeLocation, Vector.VDirection.North) => 'N',
+                    _ when Vector.CompareVectors(cNodeLocation, pNodeLocation, Vector.VDirection.South) => 'S',
+                    _ when Vector.CompareVectors(cNodeLocation, pNodeLocation, Vector.VDirection.East) => 'E',
+                    _ when Vector.CompareVectors(cNodeLocation, pNodeLocation, Vector.VDirection.West) => 'W',
+                    _ => throw new Exception("Failed to determine direction")
+                };
+                
+                pathTaken.Append(nodeDirection);
+                
             }
-            return PathTaken.ToString();
+            return pathTaken.ToString();
         }
-
-        public static Node CreateLinkNode(Vector Location, Node Parent)
-        {
-            return new Node(Location, Parent);
-        }
-        public static Node CreateStartNode(Vector StartLocation, Vector FinishLocation)
-        {
-            return new Node(StartLocation, FinishLocation);
-        }
-
+        
         private int GCostCalculate()
         {
-            return NodeInfo.GetParent()!.CostInfo.GetCostData(CostData.Access.GCost) + 1;
+            return _nodeInfo.Parent!._costInfo.GCost + 1;
         }
         private int HCostCalculate()
         {
-            return Math.Abs(CurrentLocation.GetX() - PathInfo.GetFinish().GetX()) + Math.Abs(CurrentLocation.GetY() - PathInfo.GetFinish().GetY());
+            var val1 = Math.Abs(_currentLocation.X - _pathInfo.Finish.X);
+            var val2 = Math.Abs(_currentLocation.Y - _pathInfo.Finish.Y);
+            
+            return val1 + val2;
         }
     }
 }

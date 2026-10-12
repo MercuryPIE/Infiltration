@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AT2.ObstacleControl;
+﻿using AT2.ObstacleControl;
 using AT2.Utility;
 
 namespace AT2.EndingState
@@ -12,10 +7,7 @@ namespace AT2.EndingState
     {
         private static readonly Dictionary<Vector, int> FinalObstacleList = new Dictionary<Vector, int>();
 
-        public static Dictionary<Vector, int> AccessFinalObstacles
-        {
-            get { return FinalObstacleList; }
-        }
+        public static Dictionary<Vector, int> AccessFinalObstacles => FinalObstacleList;
 
         public static void AddObstacle(Obstacle O)
         {

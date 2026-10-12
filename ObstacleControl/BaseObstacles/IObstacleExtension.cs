@@ -4,6 +4,5 @@ public interface IObstacleExtension<T> : IObstacleBase
 {
     T ExtensionData { get; set; }
     T GetExtensionData();
-    void RemoveExtensionData();
-    
+    T SetExtensionData();
 }

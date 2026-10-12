@@ -4,54 +4,50 @@ using AT2.Utility;
 
 namespace AT2.EndingState
 {
-    internal class Show
+    internal static class Show
     {
         public static void SafeDirections()
         {
             while (true)
             {
                 Console.WriteLine("Enter your current location (X,Y):");
-                string? Input = Console.ReadLine();
+                var consoleInput = Console.ReadLine();
 
-                if (Vector.IsLocationValid(Input, out Vector ValidLocation))
-                {
-                    Instruction.CalculateInstructions(Boundary.Calculate(ValidLocation));
-                    Console.WriteLine(GetSafeLocations(ValidLocation));
+                if (!Vector.IsLocationValid(consoleInput, out var validLocation)) continue;
+                
+                Boundary.BuildBoundary(true, validLocation);
+                Console.WriteLine(GetSafeLocations(validLocation));
 
-                    break;
-                }
+                break;
             }
         }
 
-        public static string GetSafeLocations(Vector Location)
+        private static string GetSafeLocations(Vector Location)
         {
             if (FinalState.AccessFinalObstacles.ContainsKey(Location))
             {
                 return "Agent, your location is compromised. Abort mission.\n";
             }
 
-            StringBuilder SafeDirections = new StringBuilder();
+            var safeDirections = new StringBuilder();
 
-            Dictionary<string, Vector> SafeLocations = new Dictionary<string, Vector>
+            var safeLocations = new Dictionary<string, Vector>
             {
-                { "N", Vector.CreateVector(Location.GetX(), Location.GetY() - 1) }, // North
-                { "S", Vector.CreateVector(Location.GetX(), Location.GetY() + 1) }, // South
-                { "W", Vector.CreateVector(Location.GetX() - 1, Location.GetY()) }, // West
-                { "E", Vector.CreateVector(Location.GetX() + 1, Location.GetY()) }  // East
+                { "N", new Vector(Location.X, Location.Y - 1) }, // North
+                { "S", new Vector(Location.X, Location.Y + 1) }, // South
+                { "W", new Vector(Location.X - 1, Location.Y) }, // West
+                { "E", new Vector(Location.X + 1, Location.Y) }  // East
                 
             };
 
-            foreach (var KVP in SafeLocations)
+            foreach (var kvp in safeLocations.Where(Kvp => !FinalState.AccessFinalObstacles.ContainsKey(Kvp.Value)))
             {
-                if (!FinalState.AccessFinalObstacles.ContainsKey(KVP.Value))
-                {
-                    SafeDirections.Append(KVP.Key);
-                }
+                safeDirections.Append(kvp.Key);
             }
 
-            return SafeDirections.Length > 0 ?
-                $"You can safely take any of the following directions: {SafeDirections}\n" :
-                $"You cannot safely move in any direction. Abort mission.\n";
+            return safeDirections.Length > 0 ?
+                $"You can safely take any of the following directions: {safeDirections}\n" :
+                "You cannot safely move in any direction. Abort mission.\n";
         }
     }
 }

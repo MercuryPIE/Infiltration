@@ -1,4 +1,5 @@
 ﻿using AT2.EndingState;
+using AT2.InstructionControl;
 using AT2.Utility;
 
 namespace AT2.ObstacleControl.BaseObstacles
@@ -7,22 +8,43 @@ namespace AT2.ObstacleControl.BaseObstacles
     {
         public Vector Location { get; set; }
         public Vector ExtensionData { get; set; }
-        private readonly ClassId _obstacleClass = ClassId.Fence;
+        public ClassId ObstacleClass => ClassId.Fence;
 
-        public Fence(Vector StartLocation, Vector EndLocation)
+        public Fence(Vector StartLocation)
         {
             Location = StartLocation;
-            ExtensionData = EndLocation;
+            ExtensionData = SetExtensionData();
 
+        }
+        
+        public Vector SetExtensionData()
+        {
+            while (true)
+            {
+                Console.WriteLine("Enter the location where the fence ends (X,Y):");
+                var consoleInput = Console.ReadLine();
+
+                if (!Vector.IsLocationValid(consoleInput, out var endLocation)) continue;
+                
+                try
+                {
+                    Validate.FenceRange(Location, endLocation);
+                    return endLocation;
+                }
+                catch (Error.InvalidRangeException exM)
+                {
+                    Console.WriteLine($"Error: {exM.Message}");
+                }
+            }
         }
         
         public void CalculateObstacle()
         {
-            Vector start = Location;
-            Vector end = ExtensionData;
+            var start = Location;
+            var end = ExtensionData;
             
-            FinalState.AddObstacle(Obstacle.Create(start, _obstacleClass));
-            FinalState.AddObstacle(Obstacle.Create(end, _obstacleClass));
+            FinalState.AddObstacle(Obstacle.Create(start, ObstacleClass));
+            FinalState.AddObstacle(Obstacle.Create(end, ObstacleClass));
 
             var isHorizontal = start.X == end.X;
 
@@ -36,15 +58,10 @@ namespace AT2.ObstacleControl.BaseObstacles
                 var x = isHorizontal ? start.X : i;
                 var y = isHorizontal ? i : start.Y;
                 
-                FinalState.AddObstacle(Obstacle.Create(new Vector(x, y), _obstacleClass));
+                FinalState.AddObstacle(Obstacle.Create(new Vector(x, y), ObstacleClass));
             }
         }
         
-        public void RemoveExtensionData()
-        {
-            ExtensionData = new Vector(0, 0, Vector.VectorState.Empty);
-        }
-
         public Vector GetExtensionData()
         {
             return ExtensionData;

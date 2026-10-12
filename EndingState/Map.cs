@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 using AT2.ObstacleControl;
+using AT2.ObstacleControl.BaseObstacles;
 using AT2.Utility;
 using static AT2.ObstacleControl.Boundary;
 using static AT2.Utility.Error;
@@ -11,68 +8,73 @@ using static AT2.Utility.Error;
 
 namespace AT2.EndingState
 {
-    public class Map
+    public static class Map
     {
         public static void CreateMap()
         {
             while (true)
             {
-                Vector TL = CreateBoundaryCorner(Corner.TopLeft);
-                Vector BR = CreateBoundaryCorner(Corner.BottomRight);
+                var tl = CreateBoundaryCorner(true);
+                var br = CreateBoundaryCorner(false);
 
-                if (CheckMapDimension(TL, BR))
-                {
-                    Boundary MapBoundary = SetBoundary(TL, BR);
-                    Instruction.CalculateInstructions(MapBoundary);
-                    DisplayMap(MapBoundary);
-                    break;
-                }
+                if (!CheckMapDimension(tl, br)) continue;
+                
+                BuildBoundary(false);
+                SetBoundaryCorners(tl, br);
+                
+                ObstacleFactory.Build();
+                DisplayMap();
+                
+                break;
             }
         }
-        private static Vector CreateBoundaryCorner(Corner Request)
+        private static Vector CreateBoundaryCorner(bool IsTopLeft)
         {
-            Vector? ValidLocation = null;
+            Vector? validLocation;
 
-            while (ValidLocation == null)
+            while (true)
             {
-                string CornerName = Request == Corner.TopLeft ? "top-left" : "bottom-right";
-                Console.WriteLine($"Enter the location of the {CornerName} top-left cell of the map (X,Y):");
+                var cornerName = IsTopLeft ? "top-left" : "bottom-right";
+                Console.WriteLine($"Enter the location of the {cornerName} cell of the map (X,Y):");
 
-                string? Input = Console.ReadLine();
+                var consoleInput = Console.ReadLine();
 
-                if (Vector.IsLocationValid(Input, out Vector Location))
-                {
-                    ValidLocation = Location;
-                }
+                if (!Vector.IsLocationValid(consoleInput, out var location)) continue;
+                validLocation = location;
+                break;
             }
-            return ValidLocation!;
+            return validLocation!;
         }
 
-        private static void DisplayMap(Boundary MapBoundary)
+        private static void DisplayMap()
         {
-            StringBuilder SB = new StringBuilder();
 
-            Vector TL = MapBoundary.GetCorner(Corner.TopLeft);
-            Vector BR = MapBoundary.GetCorner(Corner.BottomRight);
+            var finalObList = FinalState.AccessFinalObstacles;
+            var sb = new StringBuilder();
 
-            for (int Y = TL.GetY(); Y <= BR.GetY(); Y++)
+
+            var topLeft = GetTopLeft();
+            var bottomRight = GetBottomRight();
+            
+            
+            for (var y = topLeft.Y; y <= bottomRight.Y; y++)
             {
-                for (int X = TL.GetX(); X <= BR.GetX(); X++)
+                for (var x = topLeft.X; x <= bottomRight.X; x++)
                 {
-                    Vector CKey = Vector.CreateVector(X, Y);
+                    var cKey = new Vector(x, y);
 
-                    if (FinalState.AccessFinalObstacles.ContainsKey(CKey) && FinalState.AccessFinalObstacles.TryGetValue(CKey, out int PV))
+                    if (finalObList.ContainsKey(cKey) && finalObList.TryGetValue(cKey, out var pv))
                     {
-                        SB.Append((char)Obstacle.SetCid(PV));
+                        sb.Append((char)Obstacle.SetCid(pv));
                     }
                     else
                     {
-                        SB.Append('.');
+                        sb.Append('.');
                     }
                 }
-                SB.AppendLine();
+                sb.AppendLine();
             }
-            Console.WriteLine(SB.ToString());
+            Console.WriteLine(sb.ToString());
         }
 
         private static bool CheckMapDimension(Vector TopLeft, Vector BottomRight)
@@ -82,9 +84,9 @@ namespace AT2.EndingState
                 Validate.MapDimension(TopLeft, BottomRight);
                 return true;
             }
-            catch (InvalidMapDimensionException ExM)
+            catch (InvalidMapDimensionException exM)
             {
-                Console.WriteLine($"Error: {ExM.Message}");
+                Console.WriteLine($"Error: {exM.Message}");
                 return false;
             }
         }

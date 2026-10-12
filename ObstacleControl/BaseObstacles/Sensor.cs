@@ -1,4 +1,5 @@
 ﻿using AT2.EndingState;
+using AT2.InstructionControl;
 using AT2.Utility;
 
 namespace AT2.ObstacleControl.BaseObstacles
@@ -8,12 +9,12 @@ namespace AT2.ObstacleControl.BaseObstacles
         
         public Vector Location { get; set; }
         public double ExtensionData { get; set; }
-        private readonly ClassId _obstacleClass = ClassId.Sensor;
-        
-        public Sensor(Vector Location, double Range)
+        public ClassId ObstacleClass => ClassId.Sensor;
+
+        public Sensor(Vector Location)
         {
             this.Location = Location;
-            ExtensionData = Range;
+            ExtensionData = SetExtensionData();
         }
         
         public void CalculateObstacle()
@@ -41,9 +42,9 @@ namespace AT2.ObstacleControl.BaseObstacles
 
                     var newLocation = new Vector(xPos, yPos);
 
-                    if (distance <= range && Boundary.IsInBoundary(newLocation, out Vector checkedLocation))
+                    if (distance <= range && Boundary.IsInBoundary(newLocation, out var checkedLocation))
                     {
-                        FinalState.AddObstacle(Obstacle.Create(checkedLocation, _obstacleClass));
+                        FinalState.AddObstacle(Obstacle.Create(checkedLocation, ObstacleClass));
                     }
                 }
             }
@@ -53,11 +54,32 @@ namespace AT2.ObstacleControl.BaseObstacles
         {
             return ExtensionData;
         }
-        
 
-        public void RemoveExtensionData()
+        public double SetExtensionData()
         {
-            ExtensionData = 0;
+            while (true)
+            {
+                try
+                {
+                    Console.WriteLine("Enter the sensor's range (in clicks):");
+                    
+                    var consoleInput = Console.ReadLine();
+                    
+                    return Validate.SensorRange(consoleInput);
+                }
+                catch (Error.RangeBelowZeroException exM)
+                {
+                    Console.WriteLine($"Error: {exM.Message}");
+                }
+                catch (Error.InvalidInputException exM)
+                {
+                    Console.WriteLine($"Error: {exM.Message}");
+                }
+                catch (Error.EmptyConsoleException exM)
+                {
+                    Console.WriteLine($"Error: {exM.Message}");
+                }
+            }
         }
     }
 }
