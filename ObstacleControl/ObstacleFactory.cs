@@ -1,12 +1,11 @@
-using AT2.InstructionControl;
+using AT2.ObstacleControl.BaseObstacles;
 using AT2.Utility;
 
-namespace AT2.ObstacleControl.BaseObstacles;
+namespace AT2.ObstacleControl;
 
 public static class ObstacleFactory
 {
     public static readonly List<IObstacleBase> Obstacles = new();
-    
     
     public static void Build()
     {
@@ -16,20 +15,20 @@ public static class ObstacleFactory
         }
     }
 
-    public static void AddObstacle(ClassId ObstacleId)
+    public static void AddObstacle(ObstacleId OId)
     {
         while (true)
         {
-            var consoleLocation = GetConsoleLocation(ObstacleId);
+            var consoleLocation = GetConsoleLocation(OId);
 
             if (!Vector.IsLocationValid(consoleLocation, out var validVector)) continue;
             
-            IObstacleBase? obstacle = ObstacleId switch
+            IObstacleBase? obstacle = OId switch
             {
-                ClassId.Guard => new Guard(validVector),
-                ClassId.Fence => new Fence(validVector),
-                ClassId.Sensor => new Sensor(validVector),
-                ClassId.Camera => new Camera(validVector),
+                ObstacleId.Guard => new Guard(validVector),
+                ObstacleId.Fence => new Fence(validVector),
+                ObstacleId.Sensor => new Sensor(validVector),
+                ObstacleId.Camera => new Camera(validVector),
                 _ => null
             };
 
@@ -40,9 +39,9 @@ public static class ObstacleFactory
         }
     }
     
-    private static string? GetConsoleLocation(ClassId ObstacleId)
+    private static string? GetConsoleLocation(ObstacleId ObstacleId)
     {
-        var printTxt = ObstacleId == ClassId.Fence
+        var printTxt = ObstacleId == ObstacleId.Fence
             ? "Enter the location where the fence starts (X,Y):"
             : $"Enter the {ObstacleId}'s location (X,Y):";
         

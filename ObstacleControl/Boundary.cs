@@ -1,5 +1,4 @@
-﻿using AT2.InstructionControl;
-using AT2.ObstacleControl.BaseObstacles;
+﻿using AT2.ObstacleControl.BaseObstacles;
 using AT2.Utility;
 
 namespace AT2.ObstacleControl
@@ -46,7 +45,7 @@ namespace AT2.ObstacleControl
             {
                 CheckNewLocation(loc.Location);
 
-                if (loc.ObstacleClass == ClassId.Fence)
+                if (loc.ObstacleClass == ObstacleId.Fence)
                 {
                     //TODO: change the code for new system for getting fence data
                     CheckNewLocation(loc.Location); // This needs to be the Fence end pos.

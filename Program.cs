@@ -1,6 +1,7 @@
 ﻿using AT2.EndingState;
-using AT2.InstructionControl;
+using AT2.ObstacleControl;
 using AT2.ObstacleControl.BaseObstacles;
+using Path = AT2.EndingState.Path;
 
 namespace AT2
 {
@@ -16,7 +17,6 @@ namespace AT2
             DisplayMap = 'm',
             FindPath = 'p',
             Exit = 'x',
-            Invalid = 'i'
         }
 
         static void Main(string[] args)
@@ -56,7 +56,7 @@ namespace AT2
             // Try to parse the input as char and check if the char is defined in the enum of options.
             var optionCheck = char.TryParse(consoleInput, out var optionSelected) && Enum.IsDefined(typeof(Options), (int)optionSelected);
             
-            return optionCheck ? (Options)optionSelected : Options.Invalid;
+            return optionCheck ? (Options)optionSelected : throw new ArgumentOutOfRangeException();
         }
 
         private static void RunOption(Options OptionPicked)
@@ -64,38 +64,31 @@ namespace AT2
             switch (OptionPicked)
             {
                 case Options.AddGuard:
-                    Instruction.AddInstruction(ClassId.Guard);
+                    ObstacleFactory.AddObstacle(ObstacleId.Guard);
                     break;
-
                 case Options.AddFence:
-                    Instruction.AddInstruction(ClassId.Fence);
+                    ObstacleFactory.AddObstacle(ObstacleId.Fence);
                     break;
-
                 case Options.AddSensor:
-                    Instruction.AddInstruction(ClassId.Sensor);
+                    ObstacleFactory.AddObstacle(ObstacleId.Sensor);
                     break;
-
                 case Options.AddCamera:
-                    Instruction.AddInstruction(ClassId.Camera);
+                    ObstacleFactory.AddObstacle(ObstacleId.Camera);
                     break;
-
                 case Options.ShowSafeDirection:
                     Show.SafeDirections();
                     FinalState.Wipe();
                     break;
-
                 case Options.DisplayMap:
                     Map.CreateMap();
                     FinalState.Wipe();
                     break;
-
                 case Options.FindPath:
-                    Node.FindSafePath();
+                    // Path.FindSafePath();
                     FinalState.Wipe();
                     break;
-
-                case Options.Invalid:
-                    Instruction.DisplayInstructionList();
+                default:
+                    WriteOptions();
                     break;
             }
         }

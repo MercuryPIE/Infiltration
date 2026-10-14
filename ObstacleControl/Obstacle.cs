@@ -1,4 +1,4 @@
-﻿using AT2.InstructionControl;
+﻿using AT2.ObstacleControl.BaseObstacles;
 using AT2.Utility;
 
 namespace AT2.ObstacleControl
@@ -8,9 +8,9 @@ namespace AT2.ObstacleControl
         
         
         private Vector Location;
-        private ClassId CID;
+        private ObstacleId CID;
         private int PriorityValue;
-        private Obstacle(Vector Location, ClassId CID)
+        private Obstacle(Vector Location, ObstacleId CID)
         {
             this.Location = Location;
             this.CID = CID;
@@ -20,7 +20,7 @@ namespace AT2.ObstacleControl
         // -------------------------------------------------
 
         public Vector GetLocation() { return Location; }
-        public ClassId GetCID() { return CID; }
+        public ObstacleId GetCID() { return CID; }
         public int GetPV() { return PriorityValue; }
 
         // -------------------------------------------------
@@ -32,37 +32,37 @@ namespace AT2.ObstacleControl
 
         // -------------------------------------------------
 
-        public static readonly Dictionary<ClassId, int> MapCIDToPV = new Dictionary<ClassId, int>
+        public static readonly Dictionary<ObstacleId, int> MapCIDToPV = new Dictionary<ObstacleId, int>
         {
-            {ClassId.Camera, 1},
-            {ClassId.Sensor, 2},
-            {ClassId.Guard, 3},
-            {ClassId.Fence, 4},
+            {ObstacleId.Camera, 1},
+            {ObstacleId.Sensor, 2},
+            {ObstacleId.Guard, 3},
+            {ObstacleId.Fence, 4},
         };
 
-        public static readonly Dictionary<int, ClassId> MapPVToCID = new Dictionary<int, ClassId>
+        public static readonly Dictionary<int, ObstacleId> MapPVToCID = new Dictionary<int, ObstacleId>
         {
-            {1, ClassId.Camera},
-            {2, ClassId.Sensor},
-            {3, ClassId.Guard},
-            {4, ClassId.Fence}
+            {1, ObstacleId.Camera},
+            {2, ObstacleId.Sensor},
+            {3, ObstacleId.Guard},
+            {4, ObstacleId.Fence}
         };
 
         // -------------------------------------------------
 
-        public static int SetPv(ClassId Cid)
+        public static int SetPv(ObstacleId Cid)
         {
             return MapCIDToPV.GetValueOrDefault(Cid, 0);
         }
 
-        public static ClassId SetCid(int Pv)
+        public static ObstacleId SetCid(int Pv)
         {
-            return MapPVToCID.GetValueOrDefault(Pv, ClassId.Guard);
+            return MapPVToCID.GetValueOrDefault(Pv, ObstacleId.Guard);
         }
 
         // -------------------------------------------------
 
-        public static Obstacle Create(Vector Location, ClassId CID)
+        public static Obstacle Create(Vector Location, ObstacleId CID)
         {
             return new Obstacle(Location, CID);
         }

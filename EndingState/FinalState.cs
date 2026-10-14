@@ -5,30 +5,27 @@ namespace AT2.EndingState
 {
     public class FinalState
     {
-        private static readonly Dictionary<Vector, int> FinalObstacleList = new Dictionary<Vector, int>();
-
-        public static Dictionary<Vector, int> AccessFinalObstacles => FinalObstacleList;
+        public static Dictionary<Vector, int> AccessFinalObstacles { get; } = new();
 
         public static void AddObstacle(Obstacle O)
         {
-            Vector Key = O.GetLocation();
-            int NewPV = O.GetPV();
+            var key = O.GetLocation();
+            var newPv = O.GetPV();
 
-            if (FinalObstacleList.ContainsKey(Key) && FinalObstacleList.TryGetValue(Key, out int StoredPV))
+            if (AccessFinalObstacles.ContainsKey(key) && AccessFinalObstacles.TryGetValue(key, out var storedPv))
             {
-                if (Obstacle.IsPVHigher(NewPV, StoredPV))
+                if (Obstacle.IsPVHigher(newPv, storedPv))
                 {
-                    FinalObstacleList[Key] = NewPV;
+                    AccessFinalObstacles[key] = newPv;
                 }
             }
             else
             {
-                FinalObstacleList.Add(Key, NewPV);
+                AccessFinalObstacles.Add(key, newPv);
             }
         }
         public static void Wipe()
         {
-            FinalObstacleList.Clear();
             AccessFinalObstacles.Clear();
         }
 

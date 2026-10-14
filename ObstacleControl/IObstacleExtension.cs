@@ -1,4 +1,4 @@
-namespace AT2.ObstacleControl.BaseObstacles;
+namespace AT2.ObstacleControl;
 
 public interface IObstacleExtension<T> : IObstacleBase
 {

@@ -36,7 +36,7 @@ namespace AT2.Utility
                 return false;
             }
             
-            Vector other = (Vector)Obj;
+            var other = (Vector)Obj;
             
             return CompareVectors(this, other, ComOperator.Eq);
         }
@@ -132,6 +132,30 @@ namespace AT2.Utility
                 CheckedVector = new Vector(0, 0, VectorState.Empty);
                 return false;
             }
+        }
+        
+        public static Vector[] GetNeighbors(Vector Location)
+        {
+            return new[]
+            {
+                GetNeighbour(Location, VDirection.North), 
+                GetNeighbour(Location, VDirection.South), 
+                GetNeighbour(Location, VDirection.East), 
+                GetNeighbour(Location, VDirection.West)
+            };
+
+        }
+
+        private static Vector GetNeighbour(Vector Location, VDirection Direction)
+        {
+            return Direction switch
+            {
+                VDirection.North => new Vector(Location.X, Location.Y - 1),
+                VDirection.South => new Vector(Location.X, Location.Y + 1),
+                VDirection.East => new Vector(Location.X + 1, Location.Y),
+                VDirection.West => new Vector(Location.X - 1, Location.Y),
+                _ => throw new ArgumentOutOfRangeException(nameof(Direction))
+            };
         }
         
         // -------------------------------------------------
